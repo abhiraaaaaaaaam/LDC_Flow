@@ -98,15 +98,7 @@ while error > conv_crit and iteration < max_iter:
     u = u_star - (alpha_v / a_P) * (np.roll(p_correction, -1, axis=0) - p_correction) / dx
     v = v_star - (alpha_v / a_P) * (np.roll(p_correction, -1, axis=1) - p_correction) / dy
 
-    # Enforce boundary conditions on corrected velocities
-    u[:, 0] = u[:, -1] = 0  # Left and right walls
-    v[:, 0] = v[:, -1] = 0  # Left and right walls
-    u[0, :] = u[-1, :] = 0  # Bottom and top wall except for top lid
-    v[0, :] = v[-1, :] = 0  # Bottom and top wall
 
-    u[:, -1] = 1 
-
-    # Compute error and check for convergence
     error = np.linalg.norm(b)
     iteration += 1
     print(f"Iteration {iteration}: Residual error = {error}")
