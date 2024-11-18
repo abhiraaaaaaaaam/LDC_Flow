@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 L = 1.0
 Nx, Ny = 60, 60
 dx, dy = L / (Nx - 1), L / (Ny - 1)
-vis = 0.01  # Kinematic viscosity
+vis = 0.01  
 Re = 200
 conv_crit, max_iter = 1e-6, 300
-alpha_v, alpha_p = 0.3, 0.3  # Under-relaxation factors
+alpha_v, alpha_p = 0.5, 0.5  
 
 # Coefficients for momentum equations
 a_E = vis / dx**2
@@ -22,7 +22,7 @@ Aw = -1 / dx**2
 Ae = -1 / dx**2
 As = -1 / dy**2
 An = -1 / dy**2
-Ap = -2 * (1/dx**2 + 1/dy**2)  # Corrected Ap coefficient
+Ap = -2 * (1/dx**2 + 1/dy**2)  
 
 # Initialize fields
 u = np.zeros((Nx, Ny))
@@ -34,6 +34,10 @@ b = np.zeros((Nx, Ny))
 u[:, Ny-1] = 1.0  # Top lid velocity
 u[0, :] = u[Nx-1, :] = u[:, 0] = 0  # No-slip walls
 v[0, :] = v[Nx-1, :] = v[:, 0] = v[:, Ny-1] = 0  # No-slip walls
+
+#--------------------------------------------------------------------------------------------------------------------------------------
+
+# three blocks of code for the two components of velocity, and pressure solved using ADI scheme
 
 def tdma(a, b, c, d):
     n = len(d)
@@ -59,19 +63,19 @@ def ADI_u(u, v, p):
     u_new = u.copy()
     for j in range(1, Ny-1):
         for i in range(1, Nx-1):
-            # Compute face velocities
+            # Computing face velocities
             ue = 0.5 * (u[i, j] + u[i+1, j])
             uw = 0.5 * (u[i-1, j] + u[i, j])
             vn = 0.5 * (v[i, j] + v[i, j+1])
             vs = 0.5 * (v[i, j-1] + v[i, j])
             
-            # Compute convective fluxes
+            # Computing convective fluxes
             Fe = ue * dy
             Fw = uw * dy
             Fn = vn * dx
             Fs = vs * dx
             
-            # Compute coefficients
+            # Computing coefficients
             ae = a_E + np.maximum(0, -Fe)
             aw = a_W + np.maximum(0, Fw)
             an = a_N + np.maximum(0, -Fn)
@@ -129,6 +133,8 @@ def solve_pressure_correction(b):
         p_corr[1:-1, j] = tdma(a, b_diag, c, d)
     return p_corr
 
+#-------------------------------------------------------------------------------------------------------------------------------------
+
 # SIMPLE algorithm main loop
 residuals = []
 iteration = 0
@@ -147,10 +153,10 @@ while iteration < max_iter:
         for j in range(1, Ny-1):
             b[i,j] = (u_star[i-1,j] - u_star[i,j])/dx + (v_star[i,j-1] - v_star[i,j])/dy
     
-    # Step 3: Solve pressure correction equation
+    # Pressure Correction Equation 
     p_corr = solve_pressure_correction(b)
     
-    # Step 4: Correct pressure and velocities
+    # Correcting pressure and velocities
     p += alpha_p * p_corr
     
     for i in range(1, Nx-1):
@@ -158,11 +164,10 @@ while iteration < max_iter:
             u[i,j] = u_star[i,j] + alpha_v * (p_corr[i,j] - p_corr[i+1,j])/dx
             v[i,j] = v_star[i,j] + alpha_v * (p_corr[i,j] - p_corr[i,j+1])/dy
     
-    # Calculate residual
     residual = np.sqrt(np.sum((u - u_old)**2 + (v - v_old)**2))/(Nx*Ny)
     residuals.append(residual)
     
-    # Check convergence
+    # Checking convergence
     if residual < conv_crit:
         print(f"Converged after {iteration} iterations")
         break
@@ -171,7 +176,8 @@ while iteration < max_iter:
     if iteration % 10 == 0:
         print(f"Iteration {iteration}, Residual: {residual:.2e}")
 
-# Visualization
+# ------------------------------------------------------------------------------------------------------------------------------
+
 x = np.linspace(0, L, Nx)
 y = np.linspace(0, L, Ny)
 X, Y = np.meshgrid(x, y)
