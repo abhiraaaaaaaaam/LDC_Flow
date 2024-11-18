@@ -144,11 +144,10 @@ while iteration < max_iter:
     u_old = u.copy()
     v_old = v.copy()
     
-    # Step 1: Solve momentum equations
+    # Solving momentum equations
     u_star = ADI_u(u, v, p)
     v_star = ADI_v(u, v, p)
     
-    # Step 2: Compute mass imbalance
     for i in range(1, Nx-1):
         for j in range(1, Ny-1):
             b[i,j] = (u_star[i-1,j] - u_star[i,j])/dx + (v_star[i,j-1] - v_star[i,j])/dy
