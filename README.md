@@ -68,12 +68,6 @@ The script generates the following:
 4. **Convergence History**:
    - Residuals vs. Iterations.
 
-Example Outputs:
-- Velocity contour:
-  ![Velocity Contour Example](images/velocity_contour.png)
-- Streamlines:
-  ![Streamlines Example](images/streamlines.png)
-
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
